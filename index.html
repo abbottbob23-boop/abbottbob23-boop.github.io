@@ -686,10 +686,13 @@
     <a href="mailto:hello@arx.software" class="cf-email cf-fade">hello@arx.software</a>
   </div>
   <div class="cf-right cf-fade">
-    <input class="cf-input" type="text" placeholder="Your name">
-    <input class="cf-input" type="email" placeholder="Email address">
-    <textarea class="cf-textarea cf-input" rows="4" placeholder="Your message"></textarea>
-    <button class="cf-btn">Send message</button>
+    <form id="arx-contact-form" action="https://formspree.io/f/xdarlagr" method="POST">
+      <input class="cf-input" type="text" name="name" placeholder="Your name" required style="margin-bottom: 12px;">
+      <input class="cf-input" type="email" name="email" placeholder="Email address" required style="margin-bottom: 12px;">
+      <textarea class="cf-textarea cf-input" name="message" rows="4" placeholder="Your message" required style="margin-bottom: 12px;"></textarea>
+      <button class="cf-btn" type="submit" id="cf-submit-btn">Send message</button>
+      <p id="cf-status" style="font-size: 12px; margin-top: 10px; min-height: 16px;"></p>
+    </form>
   </div>
   <div class="cf-bottom cf-fade">
     <p class="cf-copy">&copy; 2025 ARX. All rights reserved. Arx Tua, Lex Tua.</p>
@@ -758,7 +761,46 @@
       }
     });
   }, { threshold: 0.2 });
-  cfEls.forEach(el => cfObserver.observe(el));
+  // Contact form — Formspree AJAX submission
+  const cfForm   = document.getElementById('arx-contact-form');
+  const cfStatus = document.getElementById('cf-status');
+  const cfBtn    = document.getElementById('cf-submit-btn');
+
+  if (cfForm) {
+    cfForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      cfBtn.disabled = true;
+      cfBtn.style.opacity = '0.6';
+      cfStatus.style.color = 'rgba(255,255,255,0.4)';
+      cfStatus.textContent = 'Sending...';
+
+      try {
+        const response = await fetch(cfForm.action, {
+          method: 'POST',
+          body: new FormData(cfForm),
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+          cfStatus.style.color = 'var(--green)';
+          cfStatus.textContent = 'Message sent — thanks for reaching out!';
+          cfForm.reset();
+        } else {
+          const data = await response.json().catch(() => null);
+          cfStatus.style.color = '#ff6b6b';
+          cfStatus.textContent = (data && data.errors)
+            ? data.errors.map(err => err.message).join(', ')
+            : 'Something went wrong. Please try again.';
+        }
+      } catch (err) {
+        cfStatus.style.color = '#ff6b6b';
+        cfStatus.textContent = 'Network error — please try again.';
+      } finally {
+        cfBtn.disabled = false;
+        cfBtn.style.opacity = '1';
+      }
+    });
+  }
 </script>
 
 </body>
