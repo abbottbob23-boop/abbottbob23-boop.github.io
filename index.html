@@ -489,6 +489,10 @@
   }
   .cf-right.visible { opacity: 1; transform: translateY(0); }
 
+  .cf-right form {
+    display: flex; flex-direction: column; width: 100%;
+  }
+
   .cf-input {
     background: rgba(255,255,255,0.04); border: 1px solid rgba(0,255,153,0.15);
     border-radius: 4px; padding: 12px 16px; color: #fff;
@@ -761,6 +765,8 @@
       }
     });
   }, { threshold: 0.2 });
+  cfEls.forEach(el => cfObserver.observe(el));
+
   // Contact form — Formspree AJAX submission
   const cfForm   = document.getElementById('arx-contact-form');
   const cfStatus = document.getElementById('cf-status');
